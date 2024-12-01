@@ -19,6 +19,10 @@ public class CarDTO {
         this.price = price;
     }
 
+    public CarDTO() {
+
+    }
+
     public void setId(Integer id) { this.id = id; }
 
     public void setCarModel(CarModelDTO carModel) { this.carModel = carModel; }
