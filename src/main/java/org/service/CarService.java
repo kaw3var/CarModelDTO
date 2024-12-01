@@ -1,58 +1,44 @@
 package org.service;
 
-import org.dto.CarModelDTO;
+import org.dto.CarDTO;
+import org.entity.CarEntity;
+import org.repository.CarEntityRepository;
+import org.service.mapper.CarMapper;
 
+import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CarService {
-    private List<CarModelDTO> carList;
 
-    public CarService(List<CarModelDTO> carList) {
-        this.carList = carList;
+    private CarEntityRepository carEntityRepository;
+
+    public CarService(EntityManager entityManager) {
+        this.carEntityRepository = new CarEntityRepository(entityManager);
     }
 
-    public Set<String> getUniqueBrands() {
-        long startTime = System.nanoTime();
-        Set<String> result = carList.stream()
-                .map(CarModelDTO::getBrand)
-                .collect(Collectors.toSet());
-        long endTime = System.nanoTime();
-        double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
-        System.out.println("getUniqueBrands выполнено за: " + durationInSeconds + " секунд");
-        return result;
+    public CarDTO getCarDTO(Integer id) {
+        CarEntity carEntity = carEntityRepository.getById(id);
+        return CarMapper.INSTANCE.carEntityToCarDTO(carEntity);
     }
 
-    public List<CarModelDTO> getModelsByBrand(String brand) {
-        long startTime = System.nanoTime();
-        List<CarModelDTO> result = carList.stream()
-                .filter(car -> car.getBrand().equalsIgnoreCase(brand))
+    public List<CarDTO> getAllCarDTOs() {
+        return carEntityRepository.getAll().stream()
+                .map(CarMapper.INSTANCE::carEntityToCarDTO)
                 .collect(Collectors.toList());
-        long endTime = System.nanoTime();
-        double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
-        System.out.println("getModelsByBrand выполнено за: " + durationInSeconds + " секунд");
-        return result;
     }
 
-    public Map<String, Integer> groupByBrand() {
-        long startTime = System.nanoTime();
-        Map<String, Integer> result = carList.stream()
-                .collect(Collectors.groupingBy(CarModelDTO::getBrand, Collectors.summingInt(c -> 1)));
-        long endTime = System.nanoTime();
-        double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
-        System.out.println("groupByBrand выполнено за: " + durationInSeconds + " секунд");
-        return result;
+    public void createCar(CarDTO carDTO) {
+        CarEntity carEntity = CarMapper.INSTANCE.carDTOToCarEntity(carDTO);
+        carEntityRepository.create(carEntity);
     }
 
-    public CarModelDTO findCarById(CarModelDTO carModel) {
-        long startTime = System.nanoTime();
-        int index = carList.indexOf(carModel);
-        CarModelDTO result = index != -1 ? carList.get(index) : null;
-        long endTime = System.nanoTime();
-        double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
-        System.out.println("findCarById выполнено за: " + durationInSeconds + " секунд");
-        return result;
+    public void updateCar(CarDTO carDTO) {
+        CarEntity carEntity = CarMapper.INSTANCE.carDTOToCarEntity(carDTO);
+        carEntityRepository.update(carEntity);
+    }
+
+    public void deleteCar(Integer id) {
+        carEntityRepository.delete(id);
     }
 }

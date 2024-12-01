@@ -62,4 +62,16 @@ public class CarModelEntity {
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
+
+    @Override
+    public String toString() {
+        return "CarModelEntity{" +
+                "id=" + id +
+                ", brand='" + brand + '\'' +
+                ", model='" + model + '\'' +
+                ", countryOrigin='" + countryOrigin + '\'' +
+                ", countryCode='" + countryCode + '\'' +
+                '}';
+    }
+
 }

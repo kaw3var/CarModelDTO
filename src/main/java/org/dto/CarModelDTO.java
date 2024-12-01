@@ -9,6 +9,8 @@ public class CarModelDTO {
     private String countryOrigin;
     private String countryCode;
 
+    public CarModelDTO() {}
+
     public CarModelDTO(Integer id, String brand, String model, String countryOrigin, String countryCode) {
         this.id = id;
         this.brand = brand;

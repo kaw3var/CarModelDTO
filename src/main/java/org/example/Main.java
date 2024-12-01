@@ -1,80 +1,80 @@
 package org.example;
 
-import org.dto.CarModelDTO;
-import org.service.CarService;
-import org.service.FileSystemCarModelService;
-import org.service.FileSystemCarModelServiceImpl;
+import org.entity.CarModelEntity;
+import org.repository.CarModelRepository;
 
-import java.util.*;
-
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Main {
     public static void main(String[] args) {
-        FileSystemCarModelService fileSystemCarService = new FileSystemCarModelServiceImpl();
-        String fileName = "C:\\Users\\Admin\\IdeaProjects\\CarModelProject\\src\\main\\resources\\CAR_MODEL.csv";
-        fileSystemCarService.load(fileName);
+        // URL для подключения к базе данных
+        String url = "jdbc:sqlserver://DESKTOP-QSVFQH3;databaseName=CarDTO;encrypt=true;trustServerCertificate=true;integratedSecurity=true;";
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("CarDTO_PU");
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        CarModelRepository carModelRepository = new CarModelRepository(entityManager);
 
-        List<CarModelDTO> allCars = fileSystemCarService.getAllCarDTOs(null);
 
-        // Вывод всех машин
-        if (allCars != null && !allCars.isEmpty()) {
-            System.out.println("| ID     | Brand          | Model                               | Country of Origin               | Country Code  |");
-            System.out.println("-------------------------------------------------------------------------------------------------------------");
+        // Переменные для хранения соединения и запроса
+        Connection connection = null;
+        Statement statement = null;
 
-            for (CarModelDTO car : allCars) {
-                System.out.println(car);
+        try {
+            // Регистрация драйвера для SQL Server
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            // Установить соединение
+            connection = DriverManager.getConnection(url);
+
+            // Проверка соединения
+            if (connection != null) {
+                System.out.println("Подключение к базе данных CarDTO успешно установлено!");
+            } else {
+                System.out.println("Не удалось подключиться к базе данных.");
             }
-        } else {
-            System.out.println("Автомобили не найдены.");
+
+            // Пример выполнения запроса
+            CarModelEntity carModelEntity = new CarModelEntity();
+            carModelEntity.setBrand("Tesla");
+            carModelEntity.setModel("Model S");
+            carModelEntity.setCountryOrigin("USA");
+            carModelEntity.setCountryCode("US");
+
+            // Создание записи
+            carModelRepository.create(carModelEntity);
+
+            // Получение записи
+            CarModelEntity foundCarModel = carModelRepository.getById(5);
+            System.out.println("Найдено: " + foundCarModel.toString());
+
+            // Обновление записи
+            carModelEntity.setModel("Model X");
+            carModelRepository.update(carModelEntity);
+
+            // Удаление записи
+            carModelRepository.delete(5);
+
+            entityManager.close();
+            entityManagerFactory.close();
+
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Закрытие ресурсов
+            try {
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-         // Все модели определенной марки
-        List<CarModelDTO> toyotaCars = fileSystemCarService.getAllCarDTOs("Toyota");
-        toyotaCars.forEach(System.out::println);
-
-        // Группировка моделей по марке
-        fileSystemCarService.getCarModelGroupByModel("Toyota").forEach((model, count) ->
-                System.out.println("Модель: " + model + ", Количество: " + count));
-
-        // Поиск автомобиля по объекту
-        Optional<CarModelDTO> foundCar = fileSystemCarService.findCarById(71);
-        foundCar.ifPresent(System.out::println);
-
-         // Создаем список автомобилей
-        List<CarModelDTO> carList = Arrays.asList(
-                new CarModelDTO(1, "Mercedes", "GLE 400", "Германия", "DE"),
-                new CarModelDTO(2, "BMW", "1 Series", "Германия", "DE"),
-                new CarModelDTO(3, "BMW", "X3", "Германия", "DE"),
-                new CarModelDTO(4, "BMW", "X4", "Германия", "DE"),
-                new CarModelDTO(5, "BMW", "X5", "Германия", "DE"),
-                new CarModelDTO(6, "BMW", "X6", "Германия", "DE"),
-                new CarModelDTO(7, "FSO", "Polonez", "Польша", "PL"),
-                new CarModelDTO(8, "Mazda", "Verisa", "Япония", "JP"),
-                new CarModelDTO(9, "Mazda", "MX-30", "Япония", "JP"),
-                new CarModelDTO(10, "Mazda", "MX-5", "Япония", "JP"),
-                new CarModelDTO(11, "Audi", "A4", "Германия", "DE"),
-                new CarModelDTO(12, "Audi", "Q3", "Германия", "DE"),
-                new CarModelDTO(13, "Mercedes", "CLC 280", "Германия", "DE"),
-                new CarModelDTO(14, "Mercedes", "GLE 500", "Германия", "DE"),
-                new CarModelDTO(15, "Audi", "Q7", "Германия", "DE")
-        );
-
-        CarService carService = new CarService(carList);
-
-        // Получение уникальных марок автомобилей
-        Set<String> uniqueBrands = carService.getUniqueBrands();
-        System.out.println("Уникальные марки автомобилей:");
-        uniqueBrands.forEach(System.out::println);
-
-        // Поиск моделей по марке автомобиля
-        String brandToSearch = "BMW";
-        List<CarModelDTO> bmwModels = carService.getModelsByBrand(brandToSearch);
-        System.out.println("\nМодели автомобилей марки " + brandToSearch + ":");
-        bmwModels.forEach(car -> System.out.println(car.getModel()));
-
-        // Группировка по марке автомобиля
-        Map<String, Integer> brandCountMap = carService.groupByBrand();
-        System.out.println("\nГруппировка автомобилей по маркам:");
-        brandCountMap.forEach((brand, count) -> System.out.println(brand + ": " + count));
     }
 }
