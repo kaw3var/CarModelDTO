@@ -24,45 +24,25 @@ public class CarModelDTO {
         this.countryCode = countryCode;
     }
 
-    public Integer getId() {
-        return id;
-    }
+    public Integer getId() { return id; }
 
-    public String getBrand() {
-        return brand;
-    }
+    public String getBrand() { return brand; }
 
-    public String getModel() {
-        return model;
-    }
+    public String getModel() { return model; }
 
-    public String getCountryOrigin() {
-        return countryOrigin;
-    }
+    public String getCountryOrigin() {  return countryOrigin; }
 
-    public String getCountryCode() {
-        return countryCode;
-    }
+    public String getCountryCode() { return countryCode; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
+    public void setBrand(String brand) { this.brand = brand; }
 
-    public void setModel(String model) {
-        this.model = model;
-    }
+    public void setModel(String model) { this.model = model; }
 
-    public void setCountryOrigin(String countryOrigin) {
-        this.countryOrigin = countryOrigin;
-    }
+    public void setCountryOrigin(String countryOrigin) { this.countryOrigin = countryOrigin; }
 
-    public void setCountryCode(String CountryCode) {
-        this.countryCode = countryCode;
-    }
+    public void setCountryCode(String CountryCode) { this.countryCode = countryCode; }
 
     @Override
     public String toString() {
@@ -77,8 +57,11 @@ public class CarModelDTO {
         if (o == null || getClass()  != o.getClass())
             return false;
         CarModelDTO car = (CarModelDTO) o;
-        return id.equals(car.id) && brand.equals(car.brand) && model.equals(car.model) &&
-                countryOrigin.equals(car.countryOrigin) && countryCode.equals(car.countryCode);
+        return Objects.equals(id, car.id) &&
+                Objects.equals(brand, car.brand) &&
+                Objects.equals(model, car.model) &&
+                Objects.equals(countryOrigin, car.countryOrigin) &&
+                Objects.equals(countryCode, car.countryCode);
     }
 
     @Override
